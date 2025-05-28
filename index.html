@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calculadora Web</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .contenedor {
+      background: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      width: 320px;
+      position: relative;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .titulo {
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      flex: 1;
+    }
+
+    .menu-icono {
+      font-size: 24px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      margin-right: 10px;
+    }
+
+    .dropdown {
+      position: absolute;
+      top: 50px;
+      left: 10px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      display: none;
+      flex-direction: column;
+      z-index: 10;
+    }
+
+    .dropdown button {
+      padding: 10px;
+      border: none;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .dropdown button:hover {
+      background-color: #eee;
+    }
+
+    .calculadora, .tiempo {
+      display: none;
+    }
+
+    .visible {
+      display: block;
+    }
+
+	.tiempo input.activo {
+  border: 2px solid #4CAF50;
+  background-color: #eaffea;
+}
+
+    #resultado {
+      width: 100%;
+      height: 50px;
+      font-size: 24px;
+      text-align: right;
+      margin-bottom: 10px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .botones {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    button {
+      padding: 15px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      background-color: #ececec;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #d0d0d0;
+    }
+
+    .igual {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .igual:hover {
+      background-color: #45a049;
+    }
+
+    .tiempo input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      text-align: right;
+      cursor: pointer;
+    }
+
+    .bloque-tiempo {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    #resultadoTiempo {
+      font-size: 18px;
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    #resultadoDecimal {
+      margin-top: 5px;
+      font-size: 16px;
+      color: #333;
+      text-align: center;
+    }
+
+    #historialTiempo {
+      font-size: 14px;
+      color: #555;
+      margin-top: 10px;
+      max-height: 100px;
+      overflow-y: auto;
+      border-top: 1px solid #ddd;
+      padding-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="contenedor">
+    <div class="header">
+      <button class="menu-icono" onclick="toggleDropdown()">☰</button>
+      <div class="titulo" id="titulo">Calculadora Numérica</div>
+    </div>
+
+    <!-- Menú desplegable -->
+    <div class="dropdown" id="dropdownMenu">
+      <button onclick="mostrarCalculadora('calculadora', 'Calculadora Numérica')">Calculadora Numérica</button>
+      <button onclick="mostrarCalculadora('tiempo', 'Calculadora de Tiempo')">Calculadora de Tiempo</button>
+    </div>
+
+    <!-- Calculadora Numérica -->
+    <div class="calculadora" id="calculadora">
+      <input type="text" id="resultado" disabled />
+      <div class="botones">
+	<button onclick="agregar('(')">(</button>
+	<button onclick="agregar(')')">)</button>
+	<button onclick="limpiar()" style=" background-color: #ff5e57; color: white;">C</button>
+	<button onclick="retroceso()">←</button>
+        <button onclick="agregar('7')">7</button>
+        <button onclick="agregar('8')">8</button>
+        <button onclick="agregar('9')">9</button>
+        <button onclick="agregar('/')">/</button>
+        <button onclick="agregar('4')">4</button>
+        <button onclick="agregar('5')">5</button>
+        <button onclick="agregar('6')">6</button>
+        <button onclick="agregar('*')">*</button>
+        <button onclick="agregar('1')">1</button>
+        <button onclick="agregar('2')">2</button>
+        <button onclick="agregar('3')">3</button>
+        <button onclick="agregar('-')">-</button>
+        <button onclick="agregar('0')">0</button>
+        <button onclick="mostrarDecimal()">.</button>
+        <button onclick="calcular()" class="igual">=</button>
+        <button onclick="agregar('+')">+</button>
+        
+      </div>
+    </div>
+
+    <!-- Calculadora de Tiempo -->
+    <div class="tiempo" id="tiempo">
+      <div class="bloque-tiempo">
+        <input type="text" placeholder="Horas" id="inputHoras" onclick="seleccionarCampo('horas')" readonly />
+        <input type="text" placeholder="Minutos" id="inputMinutos" onclick="seleccionarCampo('minutos')" readonly />
+      </div>
+      <div class="botones">
+        <button onclick="ingresarNumero('7')">7</button>
+        <button onclick="ingresarNumero('8')">8</button>
+        <button onclick="ingresarNumero('9')">9</button>
+        <button onclick="operarTiempo('+')">+</button>
+        <button onclick="ingresarNumero('4')">4</button>
+        <button onclick="ingresarNumero('5')">5</button>
+        <button onclick="ingresarNumero('6')">6</button>
+        <button disabled></button>
+        <button onclick="ingresarNumero('1')">1</button>
+        <button onclick="ingresarNumero('2')">2</button>
+        <button onclick="ingresarNumero('3')">3</button>
+        <button onclick="calcularTiempo()" class="igual">=</button>
+        <button onclick="ingresarNumero('0')">0</button>
+        <button onclick="limpiarTiempo()" style="background-color: #ff5e57; color: white;">C</button>
+	<button onclick="retrocederTiempo()">←</button>
+        <button onclick="mostrarDecimal()">dec</button>
+      </div>
+      <div id="historialTiempo"></div>
+      <div id="resultadoTiempo"></div>
+      <div id="resultadoDecimal"></div>
+    </div>
+  </div>
+
+  <script>
+    let resultadoMostrado = false;
+    let tiempoResultadoMostrado = false;
+
+	function limpiarTiempo() {
+	  operaciones = [];
+  document.getElementById('historialTiempo').innerHTML = '';
+  document.getElementById('resultadoTiempo').innerText = '';
+  document.getElementById('resultadoDecimal').innerText = '';
+  document.getElementById('botonDecimal').style.display = 'none';
+  borrarCampo();
+  tiempoResultadoMostrado = false;
+}
+
+    function toggleDropdown() {
+      const menu = document.getElementById('dropdownMenu');
+      menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    function mostrarCalculadora(id, titulo) {
+      document.getElementById("calculadora").classList.remove("visible");
+      document.getElementById("tiempo").classList.remove("visible");
+      document.getElementById(id).classList.add("visible");
+      document.getElementById("titulo").innerText = titulo;
+      document.getElementById('dropdownMenu').style.display = 'none';
+      limpiar();
+      borrarCampo();
+      limpiarTiempo();
+    }
+
+function retrocederTiempo() {
+  const campo = campoSeleccionado === 'horas' ? document.getElementById('inputHoras') : document.getElementById('inputMinutos');
+  campo.value = campo.value.slice(0, -1);
+}
+
+    function agregar(valor) {
+      if (resultadoMostrado) {
+        document.getElementById('resultado').value = '';
+        resultadoMostrado = false;
+      }
+      document.getElementById('resultado').value += valor;
+    }
+
+    function limpiar() {
+      document.getElementById('resultado').value = '';
+      resultadoMostrado = false;
+    }
+
+function retroceso() {
+  const campo = document.getElementById('resultado');
+  if (resultadoMostrado) {
+    campo.value = '';
+    resultadoMostrado = false;
+    return;
+  }
+  campo.value = campo.value.slice(0, -1);
+}
+
+    function calcular() {
+      try {
+        let resultado = eval(document.getElementById('resultado').value);
+        document.getElementById('resultado').value = resultado;
+        resultadoMostrado = true;
+      } catch (e) {
+        alert("Error en la operación");
+      }
+    }
+
+    let campoSeleccionado = 'minutos';
+    let operaciones = [];
+
+function seleccionarCampo(campo) {
+  campoSeleccionado = campo;
+
+  const inputHoras = document.getElementById('inputHoras');
+  const inputMinutos = document.getElementById('inputMinutos');
+
+  inputHoras.classList.remove('activo');
+  inputMinutos.classList.remove('activo');
+
+  if (campo === 'horas') inputHoras.classList.add('activo');
+  else inputMinutos.classList.add('activo');
+}
+
+    function ingresarNumero(num) {
+      if (tiempoResultadoMostrado) {
+        operaciones = [];
+        document.getElementById('historialTiempo').innerHTML = '';
+        borrarCampo();
+        document.getElementById('resultadoTiempo').innerText = '';
+        document.getElementById('resultadoDecimal').innerText = '';
+        tiempoResultadoMostrado = false;
+      }
+
+      const campo = campoSeleccionado === 'horas' ? document.getElementById('inputHoras') : document.getElementById('inputMinutos');
+      campo.value += num;
+    }
+
+    function borrarCampo() {
+      document.getElementById('inputHoras').value = '';
+      document.getElementById('inputMinutos').value = '';
+      tiempoResultadoMostrado = false;
+    }
+
+    function limpiarTiempo() {
+      operaciones = [];
+      document.getElementById('historialTiempo').innerHTML = '';
+      document.getElementById('resultadoTiempo').innerText = '';
+      document.getElementById('resultadoDecimal').innerText = '';
+      borrarCampo();
+      tiempoResultadoMostrado = false;
+    }
+
+    function operarTiempo(operador) {
+      let h = parseInt(document.getElementById('inputHoras').value) || 0;
+      let m = parseInt(document.getElementById('inputMinutos').value) || 0;
+
+      if (m >= 60) {
+        alert("Los minutos deben ser menos de 60");
+        return;
+      }
+
+      operaciones.push({ horas: h, minutos: m, operador: operador });
+      actualizarHistorial();
+      borrarCampo();
+      tiempoResultadoMostrado = false;
+    }
+
+    function actualizarHistorial() {
+      let texto = operaciones.map(op => `${op.operador} ${op.horas}h ${op.minutos}m`).join(' ');
+      if (texto.length > 0) {
+        texto = texto.replace(/^[\+\-]\s/, '');
+      }
+      document.getElementById('historialTiempo').innerText = texto;
+    }
+
+    function calcularTiempo() {
+      let h = parseInt(document.getElementById('inputHoras').value) || 0;
+      let m = parseInt(document.getElementById('inputMinutos').value) || 0;
+
+      if (h !== 0 || m !== 0) {
+        operaciones.push({ horas: h, minutos: m, operador: '+' });
+        actualizarHistorial();
+      }
+
+      let totalMin = 0;
+
+      operaciones.forEach(op => {
+        let tiempoEnMin = op.horas * 60 + op.minutos;
+        if (op.operador === '+') totalMin += tiempoEnMin;
+        else if (op.operador === '-') totalMin -= tiempoEnMin;
+      });
+
+      let finalHoras = Math.floor(Math.abs(totalMin) / 60);
+      let finalMin = Math.abs(totalMin) % 60;
+      let signo = totalMin < 0 ? '-' : '';
+
+      document.getElementById('resultadoTiempo').innerText =
+        `${signo}${finalHoras} horas y ${finalMin} minutos`;
+
+      document.getElementById('resultadoDecimal').innerText = '';
+      borrarCampo();
+      tiempoResultadoMostrado = true;
+      window.ultimoTotalMin = totalMin;
+    }
+
+    function mostrarDecimal() {
+      if (window.ultimoTotalMin !== undefined) {
+        let total = window.ultimoTotalMin / 60;
+        let decimalStr = total.toFixed(1).replace('.', ',');
+        let signo = total < 0 ? '-' : '';
+        document.getElementById('resultadoDecimal').innerText =
+          `(${signo}${decimalStr} horas)`;
+      }
+    }
+
+
+	document.addEventListener('keydown', function(event) {
+  const tecla = event.key;
+  const calcVisible = document.getElementById("calculadora").classList.contains("visible");
+
+  if (!calcVisible) return; // Solo activa si la calculadora numérica está visible
+
+  const teclasValidas = ['0','1','2','3','4','5','6','7','8','9','.','+','-','*','/','(',')'];
+
+  if (teclasValidas.includes(tecla)) {
+    agregar(tecla);
+  } else if (tecla === 'Enter') {
+    calcular();
+  } else if (tecla === 'Backspace') {
+    // Borrar último carácter
+    const campo = document.getElementById('resultado');
+    campo.value = campo.value.slice(0, -1);
+  } else if (tecla === 'Escape') {
+    limpiar();
+  }
+});
+
+document.addEventListener('keydown', function(event) {
+  const tecla = event.key;
+  const tiempoVisible = document.getElementById("tiempo").classList.contains("visible");
+
+  if (!tiempoVisible) return; // Solo si está visible la calculadora de tiempo
+
+  const inputHoras = document.getElementById('inputHoras');
+  const inputMinutos = document.getElementById('inputMinutos');
+
+  // Cambiar foco con flechas
+if (tecla === 'ArrowRight') {
+  seleccionarCampo('minutos');
+  inputMinutos.focus();
+  event.preventDefault();
+  return;
+} 
+if (tecla === 'ArrowLeft') {
+  seleccionarCampo('horas');
+  inputHoras.focus();
+  event.preventDefault();
+  return;
+}
+
+  // Añadir número al campo seleccionado
+  const numerosValidos = ['0','1','2','3','4','5','6','7','8','9'];
+  if (numerosValidos.includes(tecla)) {
+    if (tiempoResultadoMostrado) {
+      operaciones = [];
+      document.getElementById('historialTiempo').innerHTML = '';
+      borrarCampo();
+      tiempoResultadoMostrado = false;
+    }
+    if (campoSeleccionado === 'horas') {
+      inputHoras.value += tecla;
+    } else {
+      inputMinutos.value += tecla;
+    }
+    event.preventDefault();
+    return;
+  }
+
+  // Detectar operadores + y -
+  if (tecla === '+' || tecla === '-') {
+    operarTiempo(tecla);
+    event.preventDefault();
+    return;
+  }
+
+  // Detectar "=" y Enter para calcular
+  if (tecla === '=' || tecla === 'Enter') {
+    calcularTiempo();
+    event.preventDefault();
+    return;
+  }
+
+  // Borrar último dígito
+  if (tecla === 'Backspace') {
+    if (campoSeleccionado === 'horas') {
+      inputHoras.value = inputHoras.value.slice(0, -1);
+    } else {
+      inputMinutos.value = inputMinutos.value.slice(0, -1);
+    }
+    event.preventDefault();
+    return;
+  }
+
+  // Escape borra ambos campos
+  if (tecla === 'Escape') {
+    limpiarTiempo();
+    event.preventDefault();
+    return;
+  }
+});
+
+
+
+    mostrarCalculadora('tiempo', 'Calculadora de Tiempo');
+    seleccionarCampo('minutos');
+
+  </script>
+</body>
+</html>
