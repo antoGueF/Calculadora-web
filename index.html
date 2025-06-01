@@ -200,7 +200,7 @@
         <button onclick="agregar('3')">3</button>
         <button onclick="agregar('-')">-</button>
         <button onclick="agregar('0')">0</button>
-        <button onclick="mostrarDecimal()">.</button>
+        <button onclick="agregar('.')">.</button>
         <button onclick="calcular()" class="igual">=</button>
         <button onclick="agregar('+')">+</button>
         
@@ -229,7 +229,7 @@
         <button onclick="ingresarNumero('0')">0</button>
         <button onclick="limpiarTiempo()" style="background-color: #ff5e57; color: white;">C</button>
 	<button onclick="retrocederTiempo()">←</button>
-        <button onclick="mostrarDecimal()">dec</button>
+        <button disabled></button>
       </div>
       <div id="historialTiempo"></div>
       <div id="resultadoTiempo"></div>
@@ -374,44 +374,42 @@ function seleccionarCampo(campo) {
     }
 
     function calcularTiempo() {
-      let h = parseInt(document.getElementById('inputHoras').value) || 0;
-      let m = parseInt(document.getElementById('inputMinutos').value) || 0;
+  let h = parseInt(document.getElementById('inputHoras').value) || 0;
+  let m = parseInt(document.getElementById('inputMinutos').value) || 0;
 
-      if (h !== 0 || m !== 0) {
-        operaciones.push({ horas: h, minutos: m, operador: '+' });
-        actualizarHistorial();
-      }
+  if (h !== 0 || m !== 0) {
+    operaciones.push({ horas: h, minutos: m, operador: '+' });
+    actualizarHistorial();
+  }
 
-      let totalMin = 0;
+  let totalMin = 0;
 
-      operaciones.forEach(op => {
-        let tiempoEnMin = op.horas * 60 + op.minutos;
-        if (op.operador === '+') totalMin += tiempoEnMin;
-        else if (op.operador === '-') totalMin -= tiempoEnMin;
-      });
+  operaciones.forEach(op => {
+    let tiempoEnMin = op.horas * 60 + op.minutos;
+    if (op.operador === '+') totalMin += tiempoEnMin;
+    else if (op.operador === '-') totalMin -= tiempoEnMin;
+  });
 
-      let finalHoras = Math.floor(Math.abs(totalMin) / 60);
-      let finalMin = Math.abs(totalMin) % 60;
-      let signo = totalMin < 0 ? '-' : '';
+  let finalHoras = Math.floor(Math.abs(totalMin) / 60);
+  let finalMin = Math.abs(totalMin) % 60;
+  let signo = totalMin < 0 ? '-' : '';
 
-      document.getElementById('resultadoTiempo').innerText =
-        `${signo}${finalHoras} horas y ${finalMin} minutos`;
+  document.getElementById('resultadoTiempo').innerText =
+    `${signo}${finalHoras} horas y ${finalMin} minutos`;
 
-      document.getElementById('resultadoDecimal').innerText = '';
-      borrarCampo();
-      tiempoResultadoMostrado = true;
-      window.ultimoTotalMin = totalMin;
-    }
+  // Mostrar resultado decimal con 3 decimales automáticamente
+  let totalDecimal = totalMin / 60;
+  let signoDecimal = totalDecimal < 0 ? '-' : '';
+  document.getElementById('resultadoDecimal').innerText =
+    `(${signoDecimal}${Math.abs(totalDecimal).toFixed(3)} horas)`;
 
-    function mostrarDecimal() {
-      if (window.ultimoTotalMin !== undefined) {
-        let total = window.ultimoTotalMin / 60;
-        let decimalStr = total.toFixed(1).replace('.', ',');
-        let signo = total < 0 ? '-' : '';
-        document.getElementById('resultadoDecimal').innerText =
-          `(${signo}${decimalStr} horas)`;
-      }
-    }
+  borrarCampo();
+  tiempoResultadoMostrado = true;
+  operaciones = [];
+  document.getElementById('historialTiempo').innerHTML = '';
+}
+
+    
 
 
 	document.addEventListener('keydown', function(event) {
